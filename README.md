@@ -5,7 +5,7 @@
  Visualisation of Coulomb earth pressure for retained soils of uneven, idealised geometry using Culmann's graphical approach.
 
 ## Input
- Inputs required from the user are mainly section geometry
+ Inputs required from the user are mainly section geometry, soil parameters including friction angle.
 
 ## Output
  Yields maximum active earth pressure/minimum passive earth pressure as well as visualisation of Culmann graphs.
