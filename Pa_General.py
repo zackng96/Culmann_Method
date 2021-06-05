@@ -15,7 +15,7 @@ ERSSTopLeft = 1000
 ERSSBotRight = 3000
 ERSSBotLeft = 0
 xBound = 30000
-yBound = 8000  # bottom bound set to 10% buffer by default
+yBound = 10000  # bottom bound set to 10% buffer by default
 
 phi = 33
 c = 0  # assumed cohesionless
@@ -31,11 +31,11 @@ FstepX = 500  # Step size. Decrease for granularity
 WallColor = 'xkcd:grey'
 SoilColor = 'xkcd:dull yellow'
 SlipPlaneColor = 'r'
-WeightLineColor = 'g'
-PLineColor = 'k'
-WcoordsColor = 'k'
+WeightLineColor = 'xkcd:teal'
+PLineColor = 'xkcd:royal blue'
+WcoordsColor = 'xkcd:lime green'
 RcoordsColor = 'k'
-max_Pa_Color = 'xkcd:neon pink'
+max_Pa_Color = 'xkcd:turquoise'
 
 # Point Sizes
 WcoordsSize = 10
@@ -62,12 +62,12 @@ S6 = [xBound, 0, 0]
 xS, yS = xyGenerator([S1, S2, S3, S4, S5, S6])
 
 # Plot main features (wall + soil)
-plt.figure(figsize = (10, 10))
+plt.figure(figsize=(8, 8))
 plt.axis('equal')
 plt.xlabel('mm')
 plt.ylabel('mm')
-plt.fill(xE,yE, color=WallColor)  # wall
-plt.fill(xS,yS, color=SoilColor)  # soil
+plt.fill(xE, yE, color=WallColor)  # wall
+plt.fill(xS, yS, color=SoilColor)  # soil
 
 # Plot failure planes and compile failure surfaces for shoelace method later
 Fdict = {}
@@ -77,7 +77,7 @@ for SlipLen in range(FstartX, FendX, FstepX):
     if SlipLen > ERSSBotRight + SoilLen1 + SoilLen2:
         Fdict["F{0}".format(count)] = [SlipLen, ERSSHt + SoilHt1 + SoilHt2, 0]
         x, y = xyGenerator([S1, Fdict["F{0}".format(count)]])
-        plt.plot(x, y, color = SlipPlaneColor)
+        FS, = plt.plot(x, y, color=SlipPlaneColor, label='Failure Plane')
         FArea.append([S1, Fdict["F{0}".format(count)], S4, S3, S2])
 
     elif SlipLen > ERSSBotRight + SoilLen1:
@@ -85,7 +85,7 @@ for SlipLen in range(FstartX, FendX, FstepX):
         delY = delX / SoilLen2 * SoilHt2
         Fdict["F{0}".format(count)] = [SlipLen, ERSSHt + SoilHt1 + delY, 0]
         x, y = xyGenerator([S1, Fdict["F{0}".format(count)]])
-        plt.plot(x, y, color=SlipPlaneColor)
+        FS, = plt.plot(x, y, color=SlipPlaneColor, label='Failure Plane')
         FArea.append([S1, Fdict["F{0}".format(count)], S3, S2])
 
     elif SlipLen > ERSSBotRight:
@@ -93,11 +93,10 @@ for SlipLen in range(FstartX, FendX, FstepX):
         delY = delX / SoilLen1 * SoilHt1
         Fdict["F{0}".format(count)] = [SlipLen, ERSSHt + delY, 0]
         x, y = xyGenerator([S1, Fdict["F{0}".format(count)]])
-        plt.plot(x, y, color=SlipPlaneColor)
+        FS, = plt.plot(x, y, color=SlipPlaneColor, label='Failure Plane')
         FArea.append([S1, Fdict["F{0}".format(count)], S2])
 
     count += 1
-
 print("Total of {} failure slips considered".format(count + 1))
 
 # Plot weight line (angled at phi to horizontal)
@@ -105,7 +104,7 @@ Wgradient = math.tan(phi / 180 * math.pi)
 WeightX = (ERSSHt + SoilHt1 + SoilHt2) / Wgradient
 xW = [S1[0], ERSSBotRight + WeightX]
 yW = [S1[1], ERSSHt + SoilHt1 + SoilHt2]
-plt.plot(xW, yW, color=WeightLineColor)
+Wline, = plt.plot(xW, yW, color=WeightLineColor, label='Weight Line')
 
 # Plot P line (angled at pi-alpha-delta away from horizontal)
 theta = 180 - alpha - delta - phi
@@ -114,7 +113,7 @@ PX = WeightX
 PGradient = PY / PX
 xP = [S1[0], ERSSBotRight + PX]
 yP = [S1[1], -1 * PY]
-plt.plot(xP, yP, color=PLineColor)
+Pline, = plt.plot(xP, yP, color=PLineColor, label='P Line')
 
 # Determine area of each polygon using shoelace method to find W length
 # Firstly, define area function that takes in list of coords in FArea to compute wedge weight: Use WeightFn
@@ -131,8 +130,7 @@ for Wline in WlineList:
     WdeltaX = Wline * math.cos(phi / 180 * math.pi)
     WdeltaY = Wline * math.sin(phi / 180 * math.pi)
     WcoordsList.append([S1[0] + WdeltaX, S1[1] + WdeltaY, S1[2]])
-    plt.scatter([S1[0] + WdeltaX], [S1[1] + WdeltaY], s=WcoordsSize, zorder=3, color=WcoordsColor)
-
+    Wpoint = plt.scatter([S1[0] + WdeltaX], [S1[1] + WdeltaY], s=WcoordsSize, zorder=3, color=WcoordsColor, label='W Point')
 
 # Using sine rule to determine length of R vector and subsequently, Rcoordslist
 count = 0
@@ -147,25 +145,33 @@ for coord in FArea:
     RdeltaX = Rline * math.cos(kappa / 180 * math.pi)
     RdeltaY = Rline * math.sin(kappa / 180 * math.pi)
     RcoordsList.append([S1[0] + RdeltaX, S1[1] + RdeltaY, S1[2]])
-    plt.scatter([S1[0] + RdeltaX], [S1[1] + RdeltaY], s=RcoordsSize, zorder=3, color=RcoordsColor)
+    Rpoint = plt.scatter([S1[0] + RdeltaX], [S1[1] + RdeltaY], s=RcoordsSize, zorder=3, color=RcoordsColor, label='R Point')
     count += 1
+
 # Create smooth curve using interpolation fn
 xR, yR = xyGenerator(RcoordsList)
 interp_model = interp1d(xR, yR, kind=interp_kind)
 xR = np.linspace(np.asarray(xR).min(), np.asarray(xR).max(), interp_interval)
 yR = interp_model(xR)
-plt.plot(xR, yR, color = RcoordsColor)
+Rline, = plt.plot(xR, yR, color=RcoordsColor, label='Resultant Curve')
 
 Distancelist = []
 for n in range(len(WcoordsList)):
-    Distancelist.append(np.sqrt(np.sum((RcoordsList[n][0]-WcoordsList[n][0])**2
-                                       + (RcoordsList[n][1]-WcoordsList[n][1])**2)))
+    Distancelist.append(np.sqrt(np.sum((RcoordsList[n][0] - WcoordsList[n][0]) ** 2
+                                       + (RcoordsList[n][1] - WcoordsList[n][1]) ** 2)))
 print("Pa is {0} kN/m".format(max(Distancelist) / Weight2Len))
 
 max_Pa = max(Distancelist)
 max_Pa_index = Distancelist.index(max_Pa)
-xD, yD = xyGenerator([RcoordsList[max_Pa_index],WcoordsList[max_Pa_index]])
-plt.plot(xD, yD, color = max_Pa_Color)
-plt.xlim((-.1*xBound, 1.1*xBound))
-plt.ylim((-.1*yBound, yBound))
+xD, yD = xyGenerator([RcoordsList[max_Pa_index], WcoordsList[max_Pa_index]])
+max_Pa_line, = plt.plot(xD, yD, color=max_Pa_Color, label='Maximum Pa = {}kN/m'.format(np.around(max_Pa/Weight2Len,2)))
+
+#remove duplicates in legend
+handles, labels = plt.gca().get_legend_handles_labels()
+by_label = dict(zip(labels, handles))
+plt.legend(by_label.values(), by_label.keys())
+
+plt.title('Culmann Graphical Approach (Active, Ratio: 15mm/kN)')
+plt.xlim((-.1 * xBound, 1.1 * xBound))
+plt.ylim((-.1 * yBound, yBound))
 plt.show()
