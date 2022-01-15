@@ -2,7 +2,7 @@
  Calculation and visualisation of Coulomb active/passive earth pressure based on Culmann's graphical solution
 
 ## Purpose
- Visualisation of Coulomb earth pressure for retained soils of uneven, idealised geometry using Culmann's graphical approach.
+ Visualisation of Coulomb earth pressure for retained soils of uneven, idealised geometry using Culmann's graphical approach for education purposes.
 
 ## Input
  Inputs required from the user are mainly section geometry, soil parameters including friction angle.
