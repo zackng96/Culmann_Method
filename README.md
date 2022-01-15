@@ -11,4 +11,5 @@
  Yields maximum active earth pressure/minimum passive earth pressure as well as visualisation of Culmann graphs.
 
 ## Future Development
-1. Generalisation of slope geometry using a series of piecewise connections
+1. Display line load in output
+2. ~~Generalisation of slope geometry using a series of piecewise connections~~
