@@ -193,7 +193,9 @@ def WeightFn(coord_dict, s_params, f_params, line_load_pos = 0, line_load_mag = 
     Weight2Len = f_params.Weight2Len
     FArea_list = coord_dict['FArea_list']
     SlipLen_array = np.asarray(coord_dict['SlipLen_list'])
-    line_load_pos = np.asarray(line_load_pos)
+    WG = coord_dict['Wall_Geometry']
+    ERSSBotRight = WG[1]
+    line_load_pos = np.asarray(line_load_pos) + ERSSBotRight
     line_load_mag = np.asarray(line_load_mag)
     
     for coords,SlipLen in zip(FArea_list,SlipLen_array):
